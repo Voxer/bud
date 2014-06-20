@@ -18,14 +18,25 @@ if [[ $arch != x64 ]]; then
 	exit 1
 fi
 
+echo '> cleaning up previous builds'
+rm -rf out
+
+echo '> pulling git submodules'
 git submodule update --init --recursive
+
+echo '> pulling gyp'
 svn co http://gyp.googlecode.com/svn/trunk tools/gyp
 
-./gyp_bud    || exit 1
-make -C out/ || exit 1
+echo '> running ./gyb_bud'
+./gyp_bud > /dev/null   || exit 1
 
+echo '> running make'
+make -C out/ > /dev/null|| exit 1
+
+echo "> copying files to $out"
 mkdir -p "$out/bin"
 mv out/Release/bud "$out/bin" || exit 1
 
-echo "bud built in $SECONDS seconds, saved to $out"
+echo "> bud built in $SECONDS seconds, saved to $out"
+echo
 sha256sum "$out/bin/bud"
